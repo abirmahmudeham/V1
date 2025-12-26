@@ -1,0 +1,373 @@
+:root {
+    --bg-color: #f2f2f2;
+    /* Light Gray Main BG */
+    --board-bg: #f2f2f2;
+    --line-color: #dadada;
+    --text-color: #333;
+
+    /* Overlay Colors */
+    --overlay-bg: #14bdac;
+    --overlay-text: #545454;
+    --winner-x-color: #545454;
+    --winner-o-color: #f2ebd3;
+
+    --cell-size: 100px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: var(--text-color);
+    overflow: hidden;
+    /* Prevent scroll when overlay is active */
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Scoreboard */
+.scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.score-box {
+    /* Aesthetic Color: Blue Grey */
+    background-color: #546e7a;
+    border-radius: 8px;
+    /* Slightly softer corners */
+    width: 100px;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    color: white;
+    font-weight: 400;
+    /* Less bold than Title (700) */
+    position: relative;
+    border-bottom: 3px solid transparent;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.score-box.active {
+    border-bottom: 3px solid var(--overlay-bg);
+    /* Teal underline */
+}
+
+.player-symbol {
+    font-size: 1.2rem;
+}
+
+.player-score {
+    font-size: 1.2rem;
+}
+
+.status-text {
+    height: 20px;
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-text.hidden {
+    visibility: hidden;
+}
+
+/* Board */
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    background-color: var(--line-color);
+    border: 2px solid var(--line-color);
+    /* Matches gap color */
+    border-radius: 5px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    position: relative;
+    /* Context for overlay */
+    overflow: hidden;
+    /* Ensure overlay stays inside rounded corners */
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background-color: var(--board-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+    font-weight: 400;
+    /* Regular weight */
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Roboto', sans-serif;
+    /* Standard font for symbols */
+}
+
+.cell:hover {
+    background-color: #eaeaea;
+}
+
+.cell.x {
+    color: #545454;
+}
+
+.cell.o {
+    color: #f2ebd3;
+    /* Might be too light for light theme? Screenshot has dark O in minimal UI but light O in overlay. Let's use darker O for board and light O for overlay. Or compromise. */
+    color: #888;
+    /* Visible O for light theme */
+}
+
+/* Specifically override O color for board visibility */
+.cell.o {
+    color: #e7cba5;
+    /* gold-ish? or just gray */
+    color: #888;
+}
+
+
+/* Controls */
+.controls-area {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.ai-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--overlay-bg);
+}
+
+input:checked+.slider:before {
+    transform: translateX(16px);
+}
+
+.difficulty-container.hidden {
+    display: none;
+}
+
+#difficulty-select {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn-new-game {
+    background-color: white;
+    color: var(--overlay-bg);
+    border: 2px solid var(--overlay-bg);
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-new-game:hover {
+    background-color: var(--overlay-bg);
+    color: white;
+}
+
+/* OVERLAY - The requested feature */
+/* OVERLAY - Refined for Google Style */
+.result-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--overlay-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+
+    /* Animation hook: Scale form Center */
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease-in;
+    /* Border radius will be clipped by container overflow:hidden */
+}
+
+.result-overlay.active {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.result-overlay.hidden {
+    display: none;
+}
+
+/* Remove separate content animation, the whole overlay scales */
+.overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.winner-icon {
+    font-size: 8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Specific styles based on screenshot */
+.winner-icon.x-win {
+    color: var(--winner-x-color);
+    /* Dark Gray X */
+}
+
+.winner-icon.x-win::before {
+    content: 'X';
+}
+
+.winner-icon.o-win {
+    color: var(--winner-o-color);
+    /* Cream O */
+}
+
+.winner-icon.o-win::before {
+    content: 'O';
+}
+
+.winner-icon.draw::before {
+    content: 'XO';
+    font-size: 6rem;
+    letter-spacing: -10px;
+    color: #e0e0e0;
+    /* Gray-ish for combined? Screenshot shows X (gray) O (cream) next to each other. */
+}
+
+/* Replicating screenshot "XO" for draw */
+.winner-icon.draw {
+    display: flex;
+    gap: 10px;
+}
+
+.winner-icon.draw span:first-child {
+    color: var(--winner-x-color);
+}
+
+.winner-icon.draw span:last-child {
+    color: var(--winner-o-color);
+}
+
+
+.result-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--winner-x-color);
+    /* Matches X color usually */
+    opacity: 0.8;
+}
+
+.winner-icon.o-win~.result-text {
+    color: var(--winner-o-color);
+}
+
+/* If O wins, text cream? Screenshot shows O screen has Teal text? No, screenshots show "WINNER!" in Gray for X and Gray for O? No wait. */
+/* Image 2: O wins. Background Teal. Icon Cream O. Text "WINNER!" is Gray. */
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 400px) {
+    :root {
+        --cell-size: 80px;
+    }
+}
